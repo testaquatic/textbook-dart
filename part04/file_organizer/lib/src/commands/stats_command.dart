@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:file_organizer/src/utils/csv_utils.dart';
 import 'package:file_organizer/src/utils/file_utils.dart';
 import 'package:path/path.dart';
 
@@ -24,7 +26,8 @@ class StatsCommand extends Command<void> {
           'json': 'JSON 형식으로 출력합니다.',
           'csv': 'CSV 형식으로 출력합니다.',
         },
-      );
+      )
+      ..addOption("output", abbr: "o", help: "결과를 저장할 파일 경로 (생략 시 stdout)");
   }
 
   @override
@@ -38,6 +41,7 @@ class StatsCommand extends Command<void> {
     final targetPath = argResults!['path'] as String;
     final recursive = argResults!['recursive'] as bool;
     final format = argResults!['format'] as String;
+    final outputPath = argResults!['output'] as String?;
 
     final dir = Directory(absolute(targetPath));
     if (!dir.existsSync()) {
@@ -45,7 +49,6 @@ class StatsCommand extends Command<void> {
     }
 
     final files = await collectFiles(dir, recursive: recursive);
-
     var stats = <String, ({int count, int totalBytes})>{};
 
     // 카테고리별 집계
@@ -58,53 +61,51 @@ class StatsCommand extends Command<void> {
       );
     }
 
-    switch (format) {
-      case 'table':
-        _printTable(stats, files.length);
-        break;
-      case 'json':
-        _printJson(stats);
-        break;
-      case 'csv':
-        _printCsv(stats);
-        break;
+    String output = switch (format) {
+      'table' => _toTable(stats, files.length),
+      'json' => _toJson(stats),
+      'csv' => _toCsv(stats),
+      _ => throw UnimplementedError('알 수 없는 형식: $format'),
+    };
+
+    if (outputPath != null) {
+      await File(outputPath).writeAsString(output);
+      print("결과 저장: $outputPath");
+    } else {
+      print(output);
     }
   }
 
-  void _printTable(
-    Map<String, ({int count, int totalBytes})> stats,
-    int total,
-  ) {
-    print('카테고리          파일 수    크기');
-    print('-' * 40);
+  String _toJson(Map<String, ({int count, int totalBytes})> stats) {
+    const encoder = JsonEncoder.withIndent('  ');
+    return encoder.convert({
+      for (final e in stats.entries)
+        e.key: {"count": e.value.count, "bytes": e.value.totalBytes},
+    });
+  }
+
+  String _toCsv(Map<String, ({int count, int totalBytes})> stats) {
+    return toCsv([
+      for (final e in stats.entries)
+        {
+          "category": e.key,
+          "count": e.value.count,
+          "bytes": e.value.totalBytes,
+        },
+    ]);
+  }
+
+  String _toTable(Map<String, ({int count, int totalBytes})> stats, int total) {
+    final buffer = StringBuffer();
+    buffer.writeln("카테고리        파일 수    크기");
     for (final entry in stats.entries) {
-      final mb = ((entry.value.totalBytes) / (1024 * 1024)).toStringAsFixed(1);
-      print(
-        '${entry.key.padRight(15)} ${entry.value.count.toString().padLeft(5)}  ${mb}MB',
-      );
-    }
-    print('-' * 40);
-    print('합계                   ${total.toString().padLeft(6)}');
-  }
-
-  void _printJson(Map<String, ({int count, int totalBytes})> stats) {
-    final buffer = StringBuffer('{\n');
-    final entries = stats.entries.toList();
-    for (var i = 0; i < entries.length; i++) {
-      final e = entries[i];
-      final comma = i < entries.length - 1 ? ',' : '';
+      final mb = (entry.value.totalBytes / (1024 * 1024)).toStringAsFixed(1);
       buffer.writeln(
-        '    "${e.key}": {"count": ${e.value.count}, "bytes": ${e.value.totalBytes}}$comma',
+        "${entry.key.padRight(16)} ${entry.value.count.toString().padLeft(8)}    $mb MB",
       );
     }
-    buffer.write('}');
-    print(buffer);
-  }
-
-  void _printCsv(Map<String, ({int count, int totalBytes})> stats) {
-    print('category,count,bytes');
-    for (final e in stats.entries) {
-      print('${e.key},${e.value.count},${e.value.totalBytes}');
-    }
+    buffer.writeln("-" * 40);
+    buffer.write("합계                    ${total.toString().padLeft(6)}");
+    return buffer.toString();
   }
 }
