@@ -2,6 +2,7 @@ import 'package:args/command_runner.dart';
 import 'package:file_organizer/src/commands/organize_command.dart';
 import 'package:file_organizer/src/commands/rename_command.dart';
 import 'package:file_organizer/src/commands/stats_command.dart';
+import 'package:file_organizer/src/version.dart';
 
 /// CLI 애플리케이션의 진입점 역할을 하는 러너
 class FileOrganizerRunner {
@@ -14,15 +15,16 @@ class FileOrganizerRunner {
       ..addCommand(RenameCommand());
 
     // 전역 옵션 추가
-    _runner.argParser.addFlag(
-      'verbose',
-      abbr: 'v',
-      help: '상세 출력을 활성화합니다.',
-      negatable: false,
-    );
+    _runner.argParser
+      ..addFlag('verbose', abbr: 'v', help: '상세 출력을 활성화합니다.', negatable: false)
+      ..addFlag("version", negatable: false, help: "버전 정보를 출력한다.");
   }
 
   Future<void> run(List<String> arguments) async {
+    if (arguments.contains("--version") || arguments.contains('-V')) {
+      print('file_organizer $version (built $buildDate)');
+      return;
+    }
     await _runner.run(arguments);
   }
 }
