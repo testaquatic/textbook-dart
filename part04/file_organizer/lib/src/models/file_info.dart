@@ -55,6 +55,6 @@ class FileInfo {
 
   @override
   String toString() {
-    return 'FileInfo*($name, $humanReadableSize)';
+    return 'FileInfo($name, $humanReadableSize)';
   }
 }
