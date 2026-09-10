@@ -1,22 +1,8 @@
-import 'package:file_organizer/src/models/file_info.dart';
 import 'package:test/test.dart';
 
-void main() {
-  FileInfo makeFileInfo({
-    String path = "/tmp/test.txt",
-    String name = "test.txt",
-    String extension = ".txt",
-    int sizeBytes = 0,
-  }) {
-    return FileInfo(
-      path: path,
-      name: name,
-      extension: extension,
-      sizeBytes: sizeBytes,
-      modifiedAt: DateTime.now(),
-    );
-  }
+import '../helpers/test_helpers.dart';
 
+void main() {
   group("humanReadableSize", () {
     test("0 바이트", () {
       final info = makeFileInfo(sizeBytes: 0);
