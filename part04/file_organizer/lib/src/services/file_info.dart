@@ -7,8 +7,8 @@ import 'package:file_organizer/src/models/file_info.dart';
 /// 테스트에서는 MockFileService로 대체된다.
 abstract interface class FileService {
   /// 디렉토리에서 파일 목록을 수집한다.
-  Future<List<FileInfo>> collectFiles({
-    Directory dir,
+  Future<List<FileInfo>> collectFiles(
+    Directory dir, {
     bool recursive = false,
     Set<String> extensions,
   });

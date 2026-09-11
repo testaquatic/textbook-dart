@@ -9,12 +9,12 @@ class DefaultFileService implements FileService {
   const DefaultFileService();
 
   @override
-  Future<List<FileInfo>> collectFiles({
-    Directory? dir,
+  Future<List<FileInfo>> collectFiles(
+    Directory? dir, {
     bool recursive = false,
     Set<String> extensions = const {},
   }) {
-    return collectFiles(dir: dir, recursive: recursive, extensions: extensions);
+    return collectFiles(dir, recursive: recursive, extensions: extensions);
   }
 
   @override

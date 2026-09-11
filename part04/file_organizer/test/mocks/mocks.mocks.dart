@@ -37,16 +37,16 @@ class MockFileService extends _i1.Mock implements _i2.FileService {
   }
 
   @override
-  _i3.Future<List<_i4.FileInfo>> collectFiles({
-    _i5.Directory? dir,
+  _i3.Future<List<_i4.FileInfo>> collectFiles(
+    _i5.Directory? dir, {
     bool? recursive = false,
     Set<String>? extensions,
   }) => (super.noSuchMethod(
-    Invocation.method(#collectFiles, [], {
-      #dir: dir,
-      #recursive: recursive,
-      #extensions: extensions,
-    }),
+    Invocation.method(
+      #collectFiles,
+      [dir],
+      {#recursive: recursive, #extensions: extensions},
+    ),
     returnValue: _i3.Future<List<_i4.FileInfo>>.value(<_i4.FileInfo>[]),
   ) as _i3.Future<List<_i4.FileInfo>>);
 
