@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:file_organizer/src/models/file_info.dart';
 import 'package:file_organizer/src/services/file_info.dart';
-import 'package:file_organizer/src/utils/file_utils.dart';
+import 'package:file_organizer/src/utils/file_utils.dart' as file_utils;
 
 /// [FileService]의 실제 구현체
 class DefaultFileService implements FileService {
@@ -10,16 +10,20 @@ class DefaultFileService implements FileService {
 
   @override
   Future<List<FileInfo>> collectFiles(
-    Directory? dir, {
+    Directory dir, {
     bool recursive = false,
-    Set<String> extensions = const {},
+    Set<String>? extensions,
   }) {
-    return collectFiles(dir, recursive: recursive, extensions: extensions);
+    return file_utils.collectFiles(
+      dir,
+      recursive: recursive,
+      extensions: extensions,
+    );
   }
 
   @override
   Future<String> moveFile(File source, String destDir) {
-    return moveFileSafely(source, destDir);
+    return file_utils.moveFileSafely(source, destDir);
   }
 
   @override

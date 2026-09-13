@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:file_organizer/src/utils/csv_utils.dart';
 import 'package:file_organizer/src/utils/file_utils.dart';
+import 'package:file_organizer/src/utils/rename_utils.dart';
 import 'package:path/path.dart';
 
 class RenameCommand extends Command<void> {
@@ -61,12 +62,7 @@ class RenameCommand extends Command<void> {
     var renamed = 0;
 
     for (final fileInfo in files) {
-      var newName = fileInfo.name;
-
-      for (final rule in rules) {
-        final regex = RegExp(rule.pattern);
-        newName = newName.replaceAll(regex, rule.replacement);
-      }
+      var newName = applyRenameRules(fileInfo.name, rules);
 
       if (newName == fileInfo.name) {
         continue;

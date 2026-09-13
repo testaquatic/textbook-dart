@@ -5,7 +5,6 @@ import 'package:file_organizer/src/services/organize_service.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
-import '../helpers/test_helpers.dart';
 import '../mocks/mocks.mocks.dart';
 
 void main() {
