@@ -1,14 +1,14 @@
 /// 앱 전용 기본 예외 클래스
 class AppException implements Exception {
-  final String message;
-  final int statusCode;
-  final String? code;
 
   const AppException({
     required this.message,
     required this.statusCode,
     this.code,
   });
+  final String message;
+  final int statusCode;
+  final String? code;
 }
 
 class NotFoundException extends AppException {
