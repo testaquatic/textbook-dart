@@ -6,7 +6,7 @@ Response okResponse(dynamic data) {
 }
 
 /// 생성 성공 응답(201)
-Response createdSuccess(dynamic data) {
+Response createdResponse(dynamic data) {
   return Response.json(
     statusCode: 201,
     body: {'data': data, 'success': true},

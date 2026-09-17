@@ -1,4 +1,4 @@
-import 'package:sqlite3/sqlite3.dart' as sqlite3;
+import 'package:sqlite_async/sqlite_async.dart';
 
 /// SQLite 데이터베이스 관리
 class Database {
@@ -6,37 +6,43 @@ class Database {
 
   /// 데이터베이스를 열고 스키마를 초기화한다.
   factory Database.open(String path) {
-    final db = sqlite3.sqlite3.open(path);
-    final instance = Database._(db).._initialize();
+    final db = SqliteDatabase(path: path);
+    final instance = Database._(db);
 
+    instance._initialize().whenComplete(
+      () => instance._isInitalized = true,
+    );
+    while (!instance._isInitalized) {}
     return instance;
   }
 
   /// 인메모리 데이터베이스를 생성한다
-  factory Database.openInMemory() {
-    final db = sqlite3.sqlite3.openInMemory();
-    final instance = Database._(db).._initialize();
+  static Future<Database> openInMemory() async {
+    final db = SqliteDatabase(path: ':memory:');
+    final instance = Database._(db);
+
+    await instance._initialize();
 
     return instance;
   }
 
-  final sqlite3.Database _db;
+  final SqliteDatabase _db;
+  var _isInitalized = false;
 
-  void _initialize() {
+  Future<void> _initialize() async {
     // WAL 모드 활성화
-    _db
-      ..execute('PRAGMA journal_mode=WAL;')
-      ..execute('PRAGMA foreign_keys=ON;')
-      // 테이블 생성
-      ..execute('''
+    await _db.execute('PRAGMA journal_mode=WAL;');
+    await _db.execute('PRAGMA foreign_keys=ON;');
+    // 테이블 생성
+    await _db.execute('''
       CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         email TEXT NOT NULL UNIQUE,
         password_hash TEXT NOT NULL,
         created_at TEXT NOT NULL DEFAULT (datetime('now'))
       );
-      ''')
-      ..execute('''
+      ''');
+    await _db.execute('''
       CREATE TABLE IF NOT EXISTS todos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
@@ -46,32 +52,27 @@ class Database {
         updated_at TEXT,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
       );
-      ''')
-      // 인덱스 생성
-      ..execute(
-        'CREATE INDEX IF NOT EXISTS idx_todos_user_id ON todos(user_id);',
-      );
+      ''');
+    // 인덱스 생성
+    await _db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_todos_user_id ON todos(user_id);',
+    );
   }
 
   /// 원시 SQL을 실행한다.
-  void excute(String sql, [List<Object?> parameters = const []]) {
-    _db.execute(sql, parameters);
+  Future<void> excute(String sql, [List<Object?> parameters = const []]) async {
+    await _db.execute(sql, parameters);
   }
 
   /// SELECT 결과를 Map 목록으로 반환한다.
-  List<Map<String, dynamic>> query(
+  Future<List<Map<String, dynamic>>> query(
     String sql, [
     List<Object?> parameters = const [],
-  ]) {
-    final result = _db.select(sql, parameters);
+  ]) async {
+    final result = await _db.getAll(sql, parameters);
+
     return result.map(Map<String, dynamic>.from).toList();
   }
-
-  /// 마지막으로 삽입된 행의 ID를 반환한다.
-  int get lastInsertRowId => _db.lastInsertRowId;
-
-  /// 변경된 행 수를 반환한다.
-  int get updatedRows => _db.updatedRows;
 
   /// 연결을 닫는다.
   void close() => _db.close();

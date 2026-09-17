@@ -1,4 +1,7 @@
 import 'package:dart_frog/dart_frog.dart';
+import 'package:todo_server/src/dto/todo_dto.dart';
+import 'package:todo_server/src/todo_repositories/todo_repository.dart';
+import 'package:todo_server/src/utils/query_params.dart';
 import 'package:todo_server/src/utils/response_utils.dart';
 
 Future<Response> onRequest(RequestContext context) async {
@@ -10,44 +13,42 @@ Future<Response> onRequest(RequestContext context) async {
 }
 
 Future<Response> _getTodos(RequestContext context) async {
-  final queryParams = context.request.uri.queryParameters;
-  final completed = queryParams['completed'];
-  final limit = int.tryParse(queryParams['limit'] ?? '20') ?? 20;
-  final offset = int.tryParse(queryParams['offset'] ?? '0') ?? 0;
+  final repo = context.read<TodoRepository>();
+  final params = context.request.uri.queryParameters;
 
-  // 나중에 DB 연동
-  final todos = [
-    {'id': 1, 'title': '첫 번째 할 일', 'completed': false},
-    {'id': 2, 'title': '두 번째 할 일', 'completed': true},
-  ];
+  final limit = parseIntParams(params, 'limit', defaultValue: 20, max: 100);
+  final offset = parseIntParams(params, 'offset', defaultValue: 0, min: 0);
+  final completed = parseBoolQueryParam(params, 'completed');
 
-  final filtered = completed != null
-      ? todos.where((t) => t['completed'] == (completed == 'true')).toList()
-      : todos;
+  // 인증 미들웨어는 나중에 추가
+  // 임시 값
+  const userId = 1;
+
+  final todos = await repo.findByUserId(
+    userId,
+    completed: completed,
+    limit: limit,
+    offset: offset,
+  );
+  final total = await repo.countByUserId(userId, completed: completed);
 
   return listResponse(
-    filtered,
-    total: filtered.length,
+    todos.map((t) => t.toJson()).toList(),
+    total: total,
     page: offset ~/ limit + 1,
     limit: limit,
   );
 }
 
 Future<Response> _createTodo(RequestContext context) async {
-  final body = await context.request.json() as Map<String, dynamic>;
-  final title = body['title'] as String?;
+  final repo = context.read<TodoRepository>();
+  final json = await context.request.json() as Map<String, dynamic>;
+  final request = CreateTodoRequest.fromJson(json);
 
-  if (title == null || title.isEmpty) {
-    return Response.json(statusCode: 400, body: {'error': 'title은 필수입니다.'});
-  }
+  // 나중에 구현 예정
+  const userId = 1;
 
-  // 나중에 DB 연동
-  final newTodo = {
-    'id': 3,
-    'title': title,
-    'completed': false,
-    'created_at': DateTime.now().toIso8601String(),
-  };
+  final todo = await repo.create(userId: userId, title: request.title);
 
-  return createdSuccess(newTodo);
+  return createdResponse(todo.toJson());
 }
