@@ -10,10 +10,8 @@ class Database {
     final instance = Database._(db);
     var isInitalized = false;
 
-    instance._initialize().whenComplete(
-      () => isInitalized = true,
-    );
-    while (!isInitalized) {}
+    instance._initialize().whenComplete(() => isInitalized = true);
+    while (isInitalized) {}
     return instance;
   }
 
