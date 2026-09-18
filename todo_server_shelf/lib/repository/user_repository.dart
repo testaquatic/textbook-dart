@@ -7,7 +7,7 @@ class UserRepository {
   final Database _db;
 
   Future<User?> findByEmail(String email) async {
-    final rows = await _db.query('SELECT * FROM users WHERE email = ?', [
+    final rows = await _db.db.rawQuery('SELECT * FROM users WHERE email = ?', [
       email,
     ]);
 
@@ -19,7 +19,9 @@ class UserRepository {
   }
 
   Future<User?> findById(int id) async {
-    final rows = await _db.query('SELECT * FROM users WHERE id = ?', [id]);
+    final rows = await _db.db.rawQuery('SELECT * FROM users WHERE id = ?', [
+      id,
+    ]);
     if (rows.isEmpty) {
       return null;
     }
@@ -28,7 +30,7 @@ class UserRepository {
   }
 
   Future<User> create(String email, String passwordHash) async {
-    final rows = await _db.query(
+    final rows = await _db.db.rawQuery(
       '''
       INSERT INTO users (email, password_hash) 
       VALUES (?, ?) 

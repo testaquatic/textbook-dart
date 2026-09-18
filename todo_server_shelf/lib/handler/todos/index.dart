@@ -1,20 +1,12 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:shelf/shelf.dart';
-import 'package:shelf_router/shelf_router.dart';
 import 'package:todo_server_shelf/dto/todo_dto.dart';
 import 'package:todo_server_shelf/repository/todo_repository.dart';
 import 'package:todo_server_shelf/utils/query_params.dart';
 import 'package:todo_server_shelf/utils/response_utils.dart';
 
-final todoRouter = Router(notFoundHandler: _notFoundHandler)
-  ..get('/todos', _getTodos)
-  ..post('/todos', _createTodo);
-
-Response _notFoundHandler(Request _) => Response(HttpStatus.methodNotAllowed);
-
-Future<Response> _getTodos(Request request) async {
+Future<Response> getTodos(Request request) async {
   final repo = request.context['todoRepo'] as TodoRepository;
   final params = request.url.queryParameters;
 
@@ -42,7 +34,7 @@ Future<Response> _getTodos(Request request) async {
   );
 }
 
-Future<Response> _createTodo(Request request) async {
+Future<Response> createTodo(Request request) async {
   final repo = request.context['todoRepo'] as TodoRepository;
   final json = jsonDecode(await request.readAsString()) as Map<String, dynamic>;
   final createTodoRequest = CreateTodoRequest.fromJson(json);

@@ -234,7 +234,7 @@ packages:
     source: hosted
     version: "3.0.0"
   path:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: path
       sha256: "75cca69d1490965be98c73ceaea117e8a04dd21217b37b292c9ddbec0d955bc5"
@@ -345,6 +345,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.10.2"
+  sqflite_common:
+    dependency: transitive
+    description:
+      name: sqflite_common
+      sha256: "077e38e82c099534146a2fb31b608c2a3a4489a0f21d9af6b2f5c87b566a1ea0"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.5.13"
+  sqflite_common_ffi:
+    dependency: "direct main"
+    description:
+      name: sqflite_common_ffi
+      sha256: "4ec920a01788641fa1c9922e757c108427e7f8634cce3ce8a1073d573060f4a3"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.4.3"
   sqlite3:
     dependency: transitive
     description:
@@ -353,30 +369,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.6.0"
-  sqlite3_connection_pool:
-    dependency: transitive
-    description:
-      name: sqlite3_connection_pool
-      sha256: b01024fd67922680e5512abf3201974dab2d98d0664d145ec741740b448fdc5f
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.11"
-  sqlite3_web:
-    dependency: transitive
-    description:
-      name: sqlite3_web
-      sha256: aa6af15ef8bf8551d3a84203e3cbc022990567372e46ef98f91bdb2018fcfb0e
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.9.4"
-  sqlite_async:
-    dependency: "direct main"
-    description:
-      name: sqlite_async
-      sha256: "40c7d6f660322e4a2b4367ff75b9d5111389441aaa87e44f417420b56e0b0c97"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.14.5"
   stack_trace:
     dependency: transitive
     description:
@@ -401,6 +393,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.1"
+  synchronized:
+    dependency: transitive
+    description:
+      name: synchronized
+      sha256: "397b146f97613b83d84bdccb439bc8d0f3aebb6c1d14a9641e6f24201c490b2d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.4.2"
   term_glyph:
     dependency: transitive
     description:

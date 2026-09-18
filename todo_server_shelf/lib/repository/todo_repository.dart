@@ -25,14 +25,16 @@ class TodoRepository {
     buffer.write(' ORDER BY created_at DESC LIMIT ? OFFSET ?');
     params.addAll([limit, offset]);
 
-    final rows = await _db.query(buffer.toString(), params);
+    final rows = await _db.db.rawQuery(buffer.toString(), params);
 
     return rows.map(Todo.fromMap).toList();
   }
 
   /// 특정 할 일을 ID로 조회한다.
   Future<Todo?> findById(int id) async {
-    final rows = await _db.query('SELECT * FROM todos WHERE id = ?', [id]);
+    final rows = await _db.db.rawQuery('SELECT * FROM todos WHERE id = ?', [
+      id,
+    ]);
 
     if (rows.isEmpty) {
       return null;
@@ -44,16 +46,20 @@ class TodoRepository {
   /// 새로운 할 일을 생성한다.
   /// 반환값은 생성된 할 일 객체이다.
   Future<Todo> create({required int userId, required String title}) async {
-    final rows = await _db.query(
-      '''
-      INSERT INTO todos (title, user_id) 
-      VALUES (?, ?) 
-      RETURNING id, title, completed, user_id, created_at, updated_at;
-      ''',
-      [title, userId],
-    );
+    final todo = await _db.db.transaction((tx) async {
+      final rowId = await tx.rawInsert(
+        '''
+        INSERT INTO todos (title, user_id) 
+        VALUES (?, ?)
+        ''',
+        [title, userId],
+      );
 
-    return Todo.fromMap(rows.first);
+      return await tx
+          .rawQuery('SELECT * FROM todos WHERE id = ?', [rowId])
+          .then((rows) => Todo.fromMap(rows.first));
+    });
+    return todo;
   }
 
   /// 할 일을 수정한다.
@@ -66,12 +72,11 @@ class TodoRepository {
     final newTitle = title ?? existing.title;
     final newCompleted = completed ?? existing.completed;
 
-    final rows = await _db.query(
+    final rows = await _db.db.rawQuery(
       '''
       UPDATE todos 
       SET title = ?, completed = ?, updated_at = datetime('now') 
       WHERE id = ?
-      RETURNING id, title, completed, user_id, created_at, updated_at;
       ''',
       [newTitle, if (newCompleted) 1 else 0, id],
     );
@@ -80,14 +85,15 @@ class TodoRepository {
   }
 
   /// 할 일을 삭제한다.
-  Future<void> delete(int id) async {
-    if ((await _db.query(
+  /// 반환값은 삭제한 행수이다.
+  Future<int> delete(int id) async {
+    if ((await _db.db.rawQuery(
       '''SELECT '1' FROM todos WHERE id = ?''',
       [id],
     )).isEmpty) {
       throw const NotFoundException('할 일을 찾을 수 없습니다.');
     }
-    await _db.excute('DELETE FROM todos WHERE id = ?', [id]);
+    return await _db.db.rawDelete('DELETE FROM todos WHERE id = ?', [id]);
   }
 
   /// 사용자의 할 일 수를 반환한다.
@@ -100,7 +106,7 @@ class TodoRepository {
       params.add(completed ? 1 : 0);
     }
 
-    final rows = await _db.query(sql, params);
+    final rows = await _db.db.rawQuery(sql, params);
     return rows.first['cnt'] as int;
   }
 }
