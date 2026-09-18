@@ -6,6 +6,7 @@ import 'package:shelf_router/shelf_router.dart';
 import 'package:todo_server_shelf/database.dart';
 import 'package:todo_server_shelf/handler/todos/index.dart';
 import 'package:todo_server_shelf/middleware/cors_middleware.dart';
+import 'package:todo_server_shelf/middleware/error_middleware.dart';
 import 'package:todo_server_shelf/repository/todo_repository.dart';
 import 'package:todo_server_shelf/repository/user_repository.dart';
 
@@ -27,13 +28,10 @@ void main(List<String> args) async {
   final todoRepo = TodoRepository(db);
   final userRepo = UserRepository(db);
 
-  print(db);
-  print(todoRepo);
-  print(userRepo);
-
   // Configure a pipeline that logs requests.
   final handler = Pipeline()
       .addMiddleware(logRequests())
+      .addMiddleware(errorHandler())
       .addMiddleware(
         cors(allowedOrigins: ['http://localhost:3000', 'https://yourapp.com']),
       )

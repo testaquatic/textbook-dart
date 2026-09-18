@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
@@ -7,9 +8,11 @@ import 'package:todo_server_shelf/repository/todo_repository.dart';
 import 'package:todo_server_shelf/utils/query_params.dart';
 import 'package:todo_server_shelf/utils/response_utils.dart';
 
-final todoRouter = Router()
+final todoRouter = Router(notFoundHandler: _notFoundHandler)
   ..get('/todos', _getTodos)
   ..post('/todos', _createTodo);
+
+Response _notFoundHandler(Request _) => Response(HttpStatus.methodNotAllowed);
 
 Future<Response> _getTodos(Request request) async {
   final repo = request.context['todoRepo'] as TodoRepository;
