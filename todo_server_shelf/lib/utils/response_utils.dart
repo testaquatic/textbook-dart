@@ -1,22 +1,22 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:shelf/shelf.dart';
 
 /// 성공 응답을 표준 형식으로 반환한다.
 Response okResponse(dynamic data) {
-  return Response(
-    200,
+  return Response.ok(
+    jsonEncode({'data': data, 'success': true}),
     headers: {'Content-Type': 'application/json'},
-    body: {'data': jsonEncode(data), 'success': true},
   );
 }
 
 /// 생성 성공 응답(201)
 Response createdResponse(dynamic data) {
   return Response(
-    201,
+    HttpStatus.created,
     headers: {'Content-Type': 'application/json'},
-    body: {'data': jsonEncode(data), 'success': true},
+    body: jsonEncode({'data': data, 'success': true}),
   );
 }
 
@@ -33,10 +33,9 @@ Response listResponse(
     'meta': {'total': ?total, 'page': ?page, 'limit': ?limit},
   };
 
-  return Response(
-    200,
+  return Response.ok(
+    jsonEncode(json),
     headers: {'Content-Type': 'application/json'},
-    body: jsonEncode(json),
   );
 }
 

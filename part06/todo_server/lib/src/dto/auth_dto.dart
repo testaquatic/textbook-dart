@@ -2,6 +2,7 @@ import 'package:todo_server/src/exceptions.dart';
 
 /// 회원가입/로그인 요청 DTO
 class AuthRequest {
+  const AuthRequest({required this.email, required this.password});
 
   factory AuthRequest.fromJson(Map<String, dynamic> json) {
     final email = json['email'] as String?;
@@ -22,7 +23,6 @@ class AuthRequest {
 
     return AuthRequest(email: email.trim().toLowerCase(), password: password);
   }
-  const AuthRequest({required this.email, required this.password});
 
   final String email;
   final String password;

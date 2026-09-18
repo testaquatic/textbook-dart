@@ -1,18 +1,15 @@
 import 'dart:convert';
 
 import 'package:shelf/shelf.dart';
+import 'package:shelf_router/shelf_router.dart';
 import 'package:todo_server_shelf/dto/todo_dto.dart';
 import 'package:todo_server_shelf/repository/todo_repository.dart';
 import 'package:todo_server_shelf/utils/query_params.dart';
 import 'package:todo_server_shelf/utils/response_utils.dart';
 
-Future<Response> onRequest(Request request) async {
-  return switch (request.method) {
-    "GET" => _getTodos(request),
-    "POST" => _createTodo(request),
-    _ => Response(405),
-  };
-}
+final todoRouter = Router()
+  ..get('/todos', _getTodos)
+  ..post('/todos', _createTodo);
 
 Future<Response> _getTodos(Request request) async {
   final repo = request.context['todoRepo'] as TodoRepository;

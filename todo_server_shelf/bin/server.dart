@@ -12,7 +12,7 @@ import 'package:todo_server_shelf/repository/user_repository.dart';
 // Configure routes.
 final _router = Router()
   ..get('/echo/<message>', _echoHandler)
-  ..all('/todos', onRequest);
+  ..all('/todos', todoRouter.call);
 
 Response _echoHandler(Request request) {
   final message = request.params['message'];

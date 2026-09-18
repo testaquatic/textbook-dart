@@ -3,6 +3,9 @@ import 'package:todo_server/src/models/todo.dart';
 
 /// 할일 생성 요청 DTO
 class CreateTodoRequest {
+  const CreateTodoRequest({
+    required this.title,
+  });
 
   /// JSON Map에서 파싱하고 유효성을 검사한다.
   factory CreateTodoRequest.fromJson(Map<String, dynamic> json) {
@@ -23,15 +26,13 @@ class CreateTodoRequest {
 
     return CreateTodoRequest(title: title.trim());
   }
-  const CreateTodoRequest({
-    required this.title,
-  });
 
   final String title;
 }
 
 /// 할 일 수정 요청 DTO
 class UpdateTodoRequest {
+  const UpdateTodoRequest({this.title, this.completed});
 
   factory UpdateTodoRequest.fromJson(Map<String, dynamic> json) {
     final title = json['title'] as String?;
@@ -47,7 +48,6 @@ class UpdateTodoRequest {
 
     return UpdateTodoRequest(title: title?.trim(), completed: completed);
   }
-  const UpdateTodoRequest({this.title, this.completed});
 
   final String? title;
   final bool? completed;
