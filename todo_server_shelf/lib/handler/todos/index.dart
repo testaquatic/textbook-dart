@@ -2,12 +2,13 @@ import 'dart:convert';
 
 import 'package:shelf/shelf.dart';
 import 'package:todo_server_shelf/dto/todo_dto.dart';
+import 'package:todo_server_shelf/middleware/injection_middlewae.dart';
 import 'package:todo_server_shelf/repository/todo_repository.dart';
 import 'package:todo_server_shelf/utils/query_params.dart';
 import 'package:todo_server_shelf/utils/response_utils.dart';
 
 Future<Response> getTodos(Request request) async {
-  final repo = request.context['todoRepo'] as TodoRepository;
+  final repo = getState<TodoRepository>(request);
   final params = request.url.queryParameters;
 
   final limit = parseIntParams(params, 'limit', defaultValue: 20, max: 100);
@@ -35,7 +36,7 @@ Future<Response> getTodos(Request request) async {
 }
 
 Future<Response> createTodo(Request request) async {
-  final repo = request.context['todoRepo'] as TodoRepository;
+  final repo = getState<TodoRepository>(request);
   final json = jsonDecode(await request.readAsString()) as Map<String, dynamic>;
   final createTodoRequest = CreateTodoRequest.fromJson(json);
 

@@ -8,6 +8,8 @@ environment:
 
 dependencies:
   path: ^1.9.1
+  crypto: ^3.0.7
+  dart_jsonwebtoken: ^3.4.1
   shelf: ^1.4.2
   shelf_router: ^1.1.2
   sqflite_common_ffi: ^2.4.3
