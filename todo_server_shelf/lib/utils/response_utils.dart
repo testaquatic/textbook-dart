@@ -53,3 +53,14 @@ Response listResponse(
 Response noContentResponse() {
   return Response(204);
 }
+
+/// 인증 관련 응답
+Response authResponse({
+  required String token,
+  required Map<String, Object?> user,
+}) {
+  return jsonResponse(
+    statusCode: HttpStatus.ok,
+    json: {'token': token, 'user': user},
+  );
+}

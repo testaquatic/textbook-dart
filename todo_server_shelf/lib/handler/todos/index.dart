@@ -1,23 +1,18 @@
-import 'dart:convert';
-
 import 'package:shelf/shelf.dart';
 import 'package:todo_server_shelf/dto/todo_dto.dart';
-import 'package:todo_server_shelf/middleware/injection_middlewae.dart';
 import 'package:todo_server_shelf/repository/todo_repository.dart';
 import 'package:todo_server_shelf/utils/query_params.dart';
+import 'package:todo_server_shelf/utils/request_utils.dart';
 import 'package:todo_server_shelf/utils/response_utils.dart';
 
 Future<Response> getTodos(Request request) async {
-  final repo = getState<TodoRepository>(request);
+  final repo = request.readState<TodoRepository>();
   final params = request.url.queryParameters;
+  final userId = request.readState<int>();
 
   final limit = parseIntParams(params, 'limit', defaultValue: 20, max: 100);
   final offset = parseIntParams(params, 'offset', defaultValue: 0, min: 0);
   final completed = parseBoolQueryParam(params, 'completed');
-
-  // 인증 미들웨어는 나중에 추가
-  // 임시 값
-  const userId = 1;
 
   final todos = await repo.findByUserId(
     userId,
@@ -36,12 +31,10 @@ Future<Response> getTodos(Request request) async {
 }
 
 Future<Response> createTodo(Request request) async {
-  final repo = getState<TodoRepository>(request);
-  final json = jsonDecode(await request.readAsString()) as Map<String, dynamic>;
+  final repo = request.readState<TodoRepository>();
+  final json = await request.json();
   final createTodoRequest = CreateTodoRequest.fromJson(json);
-
-  // 나중에 구현 예정
-  const userId = 1;
+  final userId = request.readState<int>();
 
   final todo = await repo.create(
     userId: userId,

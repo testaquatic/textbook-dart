@@ -29,7 +29,10 @@ class UserRepository {
     return User.fromMap(rows.first);
   }
 
-  Future<User> create(String email, String passwordHash) async {
+  Future<User> create({
+    required String email,
+    required String passwordHash,
+  }) async {
     final rows = await _db.db.rawQuery(
       '''
       INSERT INTO users (email, password_hash) 

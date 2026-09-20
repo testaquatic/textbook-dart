@@ -3,7 +3,9 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
+import 'package:todo_server_shelf/config.dart';
 import 'package:todo_server_shelf/database.dart';
+import 'package:todo_server_shelf/handler/auth.dart';
 import 'package:todo_server_shelf/handler/todos/id/index.dart';
 import 'package:todo_server_shelf/handler/todos/index.dart';
 import 'package:todo_server_shelf/middleware/auth_middleware.dart';
@@ -12,17 +14,24 @@ import 'package:todo_server_shelf/middleware/error_middleware.dart';
 import 'package:todo_server_shelf/middleware/injection_middlewae.dart';
 import 'package:todo_server_shelf/repository/todo_repository.dart';
 import 'package:todo_server_shelf/repository/user_repository.dart';
+import 'package:todo_server_shelf/services/auth_service.dart';
 
 Future<Handler> getAppHandler() async {
   final currentPath = p.join(Directory.current.path, 'todo.db');
   final db = await Database.open(currentPath);
   final todoRepo = TodoRepository(db);
   final userRepo = UserRepository(db);
+  final appConfig = AppConfig.fromEnvironment();
+  final authService = AuthService(
+    userRepository: userRepo,
+    jwtSecret: appConfig.jwtSecret,
+  );
 
   // Configure routes.
   final appRouter = Router()
     ..get('/echo/<message>', _echoHandler)
-    ..mount('/todos', await _getTodoHandler());
+    ..mount('/todos', _getTodoHandler())
+    ..mount('/auth', _authHandler());
 
   final appHandler = Pipeline()
       .addMiddleware(logRequests())
@@ -32,12 +41,13 @@ Future<Handler> getAppHandler() async {
       )
       .addMiddleware(injectState(todoRepo))
       .addMiddleware(injectState(userRepo))
+      .addMiddleware(injectState(authService))
       .addHandler(appRouter.call);
 
   return appHandler;
 }
 
-Future<Handler> _getTodoHandler() async {
+Handler _getTodoHandler() {
   final todosRouter = Router(notFoundHandler: _notFoundHandler)
     ..get('/<stringId>', getTodo)
     ..put('/<stringId>', updateTodo)
@@ -50,6 +60,16 @@ Future<Handler> _getTodoHandler() async {
       .addHandler(todosRouter.call);
 
   return todosHandler;
+}
+
+Handler _authHandler() {
+  final authRouter = Router(notFoundHandler: _notFoundHandler)
+    ..post('/register', register)
+    ..post('/login', login);
+
+  final authHandler = Pipeline().addHandler(authRouter.call);
+
+  return authHandler;
 }
 
 Response _echoHandler(Request request) {

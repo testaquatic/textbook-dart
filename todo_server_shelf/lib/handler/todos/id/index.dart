@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:shelf/shelf.dart';
 import 'package:todo_server_shelf/dto/todo_dto.dart';
 import 'package:todo_server_shelf/exceptions.dart';
-import 'package:todo_server_shelf/middleware/injection_middlewae.dart';
 import 'package:todo_server_shelf/repository/todo_repository.dart';
+import 'package:todo_server_shelf/utils/request_utils.dart';
 import 'package:todo_server_shelf/utils/response_utils.dart';
 
 Future<Response> getTodo(Request request, String stringId) async {
@@ -12,7 +12,7 @@ Future<Response> getTodo(Request request, String stringId) async {
   if (id == null) {
     throw const ValidationException('유효하지 않은 ID입니다.');
   }
-  final repo = getState<TodoRepository>(request);
+  final repo = request.readState<TodoRepository>();
   final todo = await repo.findById(id);
   if (todo == null) {
     throw const NotFoundException('할 일을 찾을 수 없습니다.');
@@ -27,7 +27,7 @@ Future<Response> updateTodo(Request request, String stringId) async {
     throw const ValidationException('유효하지 않은 ID입니다.');
   }
 
-  final repo = getState<TodoRepository>(request);
+  final repo = request.readState<TodoRepository>();
   final json = jsonDecode(await request.readAsString()) as Map<String, dynamic>;
   final updateRequest = UpdateTodoRequest.fromJson(json);
 

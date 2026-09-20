@@ -30,3 +30,13 @@ class AuthRequest {
     return RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,}$').hasMatch(email);
   }
 }
+
+/// 회원가입/로그인 응답 DTO
+class AuthResponse {
+  const AuthResponse({required this.token, required this.user});
+
+  final String token;
+  final Map<String, dynamic> user;
+
+  Map<String, dynamic> toJson() => {'token': token, 'user': user};
+}
