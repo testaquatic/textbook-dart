@@ -19,7 +19,9 @@ class Database {
 
   /// 인메모리 데이터베이스를 생성한다
   static Future<Database> openInMemory() async {
-    final db = await sqflite_common_ffi.openDatabase(':memory:');
+    var databaseFactory = sqflite_common_ffi.databaseFactoryFfi;
+
+    final db = await databaseFactory.openDatabase(':memory:');
     final instance = Database._(db);
 
     await instance._initialize();

@@ -17,7 +17,7 @@ class Todo {
       completed: (row['completed'] as int) == 1,
       userId: row['user_id'] as int,
       createdAt: DateTime.parse(row['created_at'] as String),
-      updatedAt: row['updatedAt'] != null
+      updatedAt: row['updated_at'] != null
           ? DateTime.parse(row['updated_at'] as String)
           : null,
     );
@@ -43,11 +43,7 @@ class Todo {
   }
 
   /// 일부 필드를 변경한 새 [Todo]를 생성한다.
-  Todo copyWith({
-    String? title,
-    bool? completed,
-    DateTime? updatedAt,
-  }) {
+  Todo copyWith({String? title, bool? completed, DateTime? updatedAt}) {
     return Todo(
       id: id,
       title: title ?? this.title,

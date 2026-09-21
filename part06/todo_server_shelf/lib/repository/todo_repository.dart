@@ -46,20 +46,16 @@ class TodoRepository {
   /// 새로운 할 일을 생성한다.
   /// 반환값은 생성된 할 일 객체이다.
   Future<Todo> create({required int userId, required String title}) async {
-    final todo = await _db.db.transaction((tx) async {
-      final rowId = await tx.rawInsert(
-        '''
-        INSERT INTO todos (title, user_id) 
-        VALUES (?, ?)
-        ''',
-        [title, userId],
-      );
-
-      return await tx
-          .rawQuery('SELECT * FROM todos WHERE id = ?', [rowId])
-          .then((rows) => Todo.fromMap(rows.first));
-    });
-    return todo;
+    return _db.db
+        .rawQuery(
+          '''
+          INSERT INTO todos (title, user_id) 
+          VALUES (?, ?)
+          RETURNING id, title, completed, user_id, created_at, updated_at;
+          ''',
+          [title, userId],
+        )
+        .then((rows) => Todo.fromMap(rows.first));
   }
 
   /// 할 일을 수정한다.
@@ -72,16 +68,17 @@ class TodoRepository {
     final newTitle = title ?? existing.title;
     final newCompleted = completed ?? existing.completed;
 
-    final rows = await _db.db.rawQuery(
-      '''
-      UPDATE todos 
-      SET title = ?, completed = ?, updated_at = datetime('now') 
-      WHERE id = ?
-      ''',
-      [newTitle, if (newCompleted) 1 else 0, id],
-    );
-
-    return Todo.fromMap(rows.first);
+    return _db.db
+        .rawQuery(
+          '''
+          UPDATE todos 
+          SET title = ?, completed = ?, updated_at = datetime('now') 
+          WHERE id = ?
+          RETURNING id, title, completed, user_id, created_at, updated_at;
+          ''',
+          [newTitle, if (newCompleted) 1 else 0, id],
+        )
+        .then((rows) => Todo.fromMap(rows.first));
   }
 
   /// 할 일을 삭제한다.
@@ -93,7 +90,7 @@ class TodoRepository {
     )).isEmpty) {
       throw const NotFoundException('할 일을 찾을 수 없습니다.');
     }
-    return await _db.db.rawDelete('DELETE FROM todos WHERE id = ?', [id]);
+    return _db.db.rawDelete('DELETE FROM todos WHERE id = ?', [id]);
   }
 
   /// 사용자의 할 일 수를 반환한다.
