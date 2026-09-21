@@ -45,7 +45,7 @@ class AuthService {
   Future<AuthResponse> login(AuthRequest request) async {
     final user = await _userRepository.findByEmail(request.email);
     if (user == null) {
-      throw const ValidationException('이메일 또는 비밀번호가 올바르지 않습니다.');
+      throw const UnauthorizedException('이메일 또는 비밀번호가 올바르지 않습니다.');
     }
 
     if (!_verifyPassword(request.password, user.passwordHash)) {
@@ -88,5 +88,10 @@ class AuthService {
 
   bool _verifyPassword(String password, String hash) {
     return _hashPassword(password) == hash;
+  }
+
+  /// 테스트 전용: 비밀번호를 해시한다
+  String hashPasswordForTest(String password) {
+    return _hashPassword(password);
   }
 }
