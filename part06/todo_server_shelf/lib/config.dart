@@ -2,7 +2,7 @@ import 'dart:io';
 
 /// 애플리케이션 설정
 class AppConfig {
-  const AppConfig._({
+  const AppConfig({
     required this.jwtSecret,
     required this.dbPath,
     required this.port,
@@ -18,7 +18,7 @@ class AppConfig {
     if (jwtSecret == null || jwtSecret.isEmpty) {
       throw StateError(
         'JWT_SECRET 환경 변수가 설정되지 않았습니다.\n'
-        '예: export JWT_SECRET="your-secret-key-at-least-32-chars',
+        '예: export JWT_SECRET="your-secret-key-at-least-32-chars"',
       );
     }
 
@@ -26,7 +26,7 @@ class AppConfig {
       throw StateError('JWT_SECRET는 최소 32자 이상이어야 합니다.');
     }
 
-    return AppConfig._(
+    return AppConfig(
       jwtSecret: jwtSecret,
       dbPath: Platform.environment['DB_PATH'] ?? 'todo.db',
       port: int.tryParse(Platform.environment['PORT'] ?? '8080') ?? 8080,

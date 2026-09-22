@@ -1,10 +1,8 @@
 import 'dart:io';
 
-import 'package:path/path.dart' as p;
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:todo_server_shelf/config.dart';
-import 'package:todo_server_shelf/database.dart';
 import 'package:todo_server_shelf/handler/auth.dart';
 import 'package:todo_server_shelf/handler/todos/id/index.dart';
 import 'package:todo_server_shelf/handler/todos/index.dart';
@@ -16,12 +14,12 @@ import 'package:todo_server_shelf/repository/todo_repository.dart';
 import 'package:todo_server_shelf/repository/user_repository.dart';
 import 'package:todo_server_shelf/services/auth_service.dart';
 
-Future<Handler> getAppHandler() async {
-  final currentPath = p.join(Directory.current.path, 'todo.db');
-  final db = await Database.open(currentPath);
-  final todoRepo = TodoRepository(db);
-  final userRepo = UserRepository(db);
-  final appConfig = AppConfig.fromEnvironment();
+Future<Handler> getAppHandler({
+  required TodoRepository todoRepo,
+  required UserRepository userRepo,
+  required AppConfig appConfig,
+}) async {
+
   final authService = AuthService(
     userRepository: userRepo,
     jwtSecret: appConfig.jwtSecret,

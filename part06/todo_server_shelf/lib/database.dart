@@ -1,3 +1,6 @@
+import 'dart:ffi';
+import 'dart:math';
+
 import 'package:sqflite_common_ffi/sqflite_common_ffi.dart'
     as sqflite_common_ffi;
 
@@ -21,7 +24,10 @@ class Database {
   static Future<Database> openInMemory() async {
     var databaseFactory = sqflite_common_ffi.databaseFactoryFfi;
 
-    final db = await databaseFactory.openDatabase(':memory:');
+    // 겹치면 로또부터 사자
+    final db = await databaseFactory.openDatabase(
+      '${Random().nextInt(4294967296)}:memory:',
+    );
     final instance = Database._(db);
 
     await instance._initialize();

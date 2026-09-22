@@ -8,7 +8,6 @@ import 'package:todo_server_shelf/utils/response_utils.dart';
 Future<Response> register(Request request) async {
   final json = await request.json();
   final authRequest = AuthRequest.fromJson(json);
-
   final authService = getState<AuthService>(request);
   final response = await authService.register(authRequest);
 
