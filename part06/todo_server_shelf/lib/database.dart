@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'dart:math';
 
 import 'package:sqflite_common_ffi/sqflite_common_ffi.dart'
