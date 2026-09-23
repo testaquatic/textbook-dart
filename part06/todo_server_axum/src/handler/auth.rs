@@ -4,7 +4,7 @@ use axum::{
     http,
     response::{IntoResponse, Response},
 };
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 use utoipa::OpenApi;
 
 use crate::{
