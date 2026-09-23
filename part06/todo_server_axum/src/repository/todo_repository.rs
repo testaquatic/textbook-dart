@@ -1,6 +1,6 @@
 use sqlx::SqlitePool;
 
-use crate::model::todo::Sqlite3Todo;
+use crate::repository::types::Sqlite3Todo;
 
 pub struct Sqlite3TodoRepository {
     pool: SqlitePool,

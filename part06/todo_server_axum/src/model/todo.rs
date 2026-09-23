@@ -1,6 +1,8 @@
 use chrono::{DateTime, Utc};
 use secrecy::SecretString;
 
+use crate::repository::types::Sqlite3Todo;
+
 #[derive(serde::Serialize)]
 pub struct Todo {
     pub id: i64,
@@ -29,22 +31,6 @@ impl TryFrom<Sqlite3Todo> for Todo {
     }
 }
 
-pub struct Sqlite3Todo {
-    pub id: i64,
-    pub title: String,
-    pub completed: i64,
-    pub user_id: i64,
-    pub created_at: String,
-    pub updated_at: Option<String>,
-}
-
-pub struct Sqlite3User {
-    pub id: i64,
-    pub email: String,
-    pub password_hash: SecretString,
-    pub created_at: String,
-}
-
 #[derive(serde::Deserialize)]
 pub struct CreateTodoRequest {
     pub title: String,
@@ -54,4 +40,11 @@ pub struct CreateTodoRequest {
 pub struct UpdateTodoRequest {
     pub title: String,
     pub completed: bool,
+}
+
+pub struct User {
+    pub id: i64,
+    pub email: String,
+    password_hash: SecretString,
+    pub created_at: DateTime<Utc>,
 }

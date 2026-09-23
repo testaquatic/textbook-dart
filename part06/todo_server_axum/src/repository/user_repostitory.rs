@@ -1,7 +1,7 @@
 use secrecy::{ExposeSecret, SecretString};
 use sqlx::SqlitePool;
 
-use crate::model::todo::Sqlite3User;
+use crate::repository::types::Sqlite3User;
 
 pub struct Sqlite3UserRepository {
     pool: SqlitePool,
