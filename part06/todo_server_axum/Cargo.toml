@@ -8,7 +8,7 @@ anyhow = "1.0.104"
 argon2 = "0.6.0"
 axum = "0.8.9"
 chrono = { version = "0.4.45", features = ["serde"] }
-insta = { version = "1.48.0", features = ["serde", "json", "redactions"] }
+insta = { version = "1.48.0", features = ["json", "redactions", "serde"] }
 jsonwebtoken = { version = "11.1.0", features = ["rust_crypto"] }
 rand = "0.10.3"
 regex = "1.13.1"
@@ -22,7 +22,9 @@ tokio = { version = "1.53.1", features = ["macros", "parking_lot", "rt-multi-thr
 tower-http = { version = "0.7.1", features = ["trace"] }
 tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.23", features = ["env-filter", "json"] }
-utoipa = { version = "6.0.0", features = ["axum_extras"] }
+utoipa = { version = "5", features = ["axum_extras"] }
+utoipa-axum = "0.3.0"
+utoipa-swagger-ui = { version = "9.0.2", features = ["axum", "reqwest"] }
 uuid = { version = "1.26.1", features = ["v7"] }
 
 [dev-dependencies]

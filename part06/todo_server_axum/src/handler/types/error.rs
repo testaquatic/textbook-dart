@@ -53,7 +53,7 @@ impl From<ServiceError> for AppError {
     }
 }
 
-#[derive(serde::Serialize)]
+#[derive(serde::Serialize, utoipa::ToSchema)]
 pub struct ErrorResponse {
     error: String,
     #[serde(skip_serializing_if = "Option::is_none")]

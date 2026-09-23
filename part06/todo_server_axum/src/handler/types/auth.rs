@@ -1,3 +1,4 @@
+use chrono::DateTime;
 use regex::Regex;
 use secrecy::{ExposeSecret, SecretString};
 use serde::Serializer;
@@ -5,10 +6,11 @@ use serde::Serializer;
 use crate::{handler::types::error::AppError, repository::types::Sqlite3User};
 
 /// 인증 관련 응답
-#[derive(serde::Serialize)]
+#[derive(serde::Serialize, utoipa::ToSchema)]
 pub struct UserResponse {
     /// JWT 토큰
     #[serde(serialize_with = "serialize_secret_string")]
+    #[schema(value_type= String)]
     pub token: SecretString,
     /// 사용자 정보
     pub user: UserInfo,
@@ -27,7 +29,7 @@ where
 }
 
 /// 사용자 정보
-#[derive(serde::Serialize)]
+#[derive(serde::Serialize, utoipa::ToSchema)]
 pub struct UserInfo {
     pub id: i64,
     pub email: String,
@@ -46,9 +48,10 @@ impl From<Sqlite3User> for UserInfo {
 }
 
 /// 인증 관련 요청
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, utoipa::ToSchema)]
 pub struct AuthRequest {
     pub email: String,
+    #[schema(value_type = String)]
     pub password: SecretString,
 }
 impl AuthRequest {
