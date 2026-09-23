@@ -1,7 +1,6 @@
-use secrecy::SecretString;
 use sqlx::SqlitePool;
 use todo_server_axum::{
-    config::Configuration, startup::run_app, state::AppState, telemetry::init_telemetry,
+    config::get_configuration, startup::run_app, state::AppState, telemetry::init_telemetry,
 };
 use tokio::net::TcpListener;
 
@@ -10,12 +9,8 @@ async fn main() {
     // 로깅 초기화
     init_telemetry();
 
-    // 임시로 하드코딩 했다.
-    let config = Configuration {
-        port: 8080,
-        db_path: "todo.db".to_string(),
-        jwt_secret: SecretString::new("todo-secret-key".into()),
-    };
+    // 설정을 불러온다.
+    let config = get_configuration().expect("설정 불러오기 실패");
 
     // DB 풀을 생성한다.
     let pool = SqlitePool::connect(config.db_path.as_str())
@@ -26,7 +21,7 @@ async fn main() {
     let state = AppState::new(config, pool);
 
     // 리스너를 생성한다.
-    let listener = TcpListener::bind(format!("localhost:{}", state.config.port))
+    let listener = TcpListener::bind(format!("{}:{}", state.config.bind_addr, state.config.port))
         .await
         .expect("주소 바인딩 실패");
 

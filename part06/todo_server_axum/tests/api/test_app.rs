@@ -1,8 +1,10 @@
 use reqwest::Response;
-use secrecy::SecretString;
 use sqlx::SqlitePool;
 use todo_server_axum::{
-    config::Configuration, startup::run_app, state::AppState, telemetry::init_telemetry,
+    config::{Configuration, get_configuration},
+    startup::run_app,
+    state::AppState,
+    telemetry::init_telemetry,
 };
 use tokio::{net::TcpListener, task::JoinHandle};
 
@@ -17,13 +19,11 @@ impl TestApp {
         init_telemetry();
 
         // 임시로 하드코딩 했다.
-        let mut config = Configuration {
-            port: 0,
-            db_path: ":memory:".to_string(),
-            jwt_secret: SecretString::new("todo-secret-key".into()),
-        };
+        let mut config = get_configuration()?;
+        config.port = 0;
+        config.db_path = ":memory:".to_string();
 
-        let listener = TcpListener::bind("localhost:0").await?;
+        let listener = TcpListener::bind(format!("{}:{}", config.bind_addr, config.port)).await?;
         config.port = listener.local_addr()?.port();
 
         let pool = SqlitePool::connect(config.db_path.as_str())

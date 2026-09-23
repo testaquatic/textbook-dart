@@ -1,0 +1,4 @@
+jwt_secret: "lA_Long_Time_Ago,_In_a_Galaxy_Far,_Far_Away"
+db_path: "todo.db"
+bind_addr: "localhost"
+port: 8080
