@@ -1,15 +1,18 @@
+use sqlx::SqlitePool;
+
 use crate::model::todo::Sqlite3Todo;
 
 pub struct Sqlite3TodoRepository {
-    pub pool: sqlx::Pool<sqlx::Sqlite>,
+    pool: SqlitePool,
 }
 
 impl Sqlite3TodoRepository {
-    pub fn new(pool: sqlx::Pool<sqlx::Sqlite>) -> Self {
+    pub fn new(pool: SqlitePool) -> Self {
         Self { pool }
     }
 
     /// 사용자의 모든 할 일을 조회한다.
+    #[tracing::instrument(skip_all, fields(todos.user_id = %user_id))]
     pub async fn find_by_user_id(
         &self,
         user_id: i64,
@@ -51,6 +54,7 @@ impl Sqlite3TodoRepository {
     }
 
     /// 특정 할 일을 ID로 조회한다.
+    #[tracing::instrument(skip_all, fields(todos.id = %id))]
     pub async fn find_by_id(&self, id: i64) -> Result<Option<Sqlite3Todo>, sqlx::Error> {
         sqlx::query_as!(
             Sqlite3Todo,
@@ -64,6 +68,7 @@ impl Sqlite3TodoRepository {
     }
 
     /// 새로운 할 일을 생성한다.
+    #[tracing::instrument(skip_all, fields(todos.id = tracing::field::Empty, todos.user_id = %user_id))]
     pub async fn create(&self, user_id: i64, title: &str) -> Result<Sqlite3Todo, sqlx::Error> {
         let row = sqlx::query!(
             r#"
@@ -77,10 +82,13 @@ impl Sqlite3TodoRepository {
         .fetch_one(&self.pool)
         .await?;
 
+        let id = row
+            .id
+            .ok_or_else(|| sqlx::error::Error::ColumnNotFound("id".into()))?;
+        tracing::Span::current().record("skip_all", id);
+
         Ok(Sqlite3Todo {
-            id: row
-                .id
-                .ok_or_else(|| sqlx::error::Error::ColumnNotFound("id".into()))?,
+            id,
             title: row.title,
             completed: row.completed,
             user_id: row.user_id,
@@ -90,6 +98,7 @@ impl Sqlite3TodoRepository {
     }
 
     /// 할 일을 수정한다.
+    #[tracing::instrument(skip_all, fields(todos.id = %id))]
     pub async fn update(
         &self,
         id: i64,
@@ -126,6 +135,7 @@ impl Sqlite3TodoRepository {
     }
 
     /// 할 일을 삭제한다.
+    #[tracing::instrument(skip_all, fields(todos.id = %id))]
     pub async fn delete(&self, id: i64) -> Result<Sqlite3Todo, sqlx::Error> {
         sqlx::query_as!(
             Sqlite3Todo,
@@ -141,18 +151,19 @@ impl Sqlite3TodoRepository {
 #[cfg(test)]
 mod tests {
 
-    use crate::repository::todo_repository::Sqlite3TodoRepository;
+    use secrecy::SecretString;
+
+    use crate::repository::{
+        todo_repository::Sqlite3TodoRepository, user_repostitory::Sqlite3UserRepository,
+    };
 
     async fn create_inmemory_todo_repo() -> Result<Sqlite3TodoRepository, anyhow::Error> {
         let pool = sqlx::SqlitePool::connect(":memory:").await?;
         sqlx::migrate!("./migrations").run(&pool).await?;
-        sqlx::query!(
-            "INSERT INTO users (email, password_hash) VALUES (?, ?)",
-            "test@example.com",
-            "password"
-        )
-        .execute(&pool)
-        .await?;
+        let user_repo = Sqlite3UserRepository::new(pool.clone());
+        user_repo
+            .create("test@example.com", &SecretString::new("password".into()))
+            .await?;
 
         Ok(Sqlite3TodoRepository { pool })
     }
@@ -209,6 +220,11 @@ mod tests {
 
         assert_eq!(todo.title, "Test Todo Updated");
         assert_eq!(todo.completed, 1);
+
+        let new_todo = todo_repo.update(1, None, None).await?;
+
+        assert_eq!(new_todo.title, todo.title);
+        assert_eq!(new_todo.completed, todo.completed);
 
         Ok(())
     }

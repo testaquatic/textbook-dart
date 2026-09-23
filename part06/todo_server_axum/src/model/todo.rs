@@ -1,5 +1,5 @@
 use chrono::{DateTime, Utc};
-use sqlx::{FromRow, Row, sqlite::SqliteRow};
+use secrecy::SecretString;
 
 #[derive(serde::Serialize)]
 pub struct Todo {
@@ -29,33 +29,6 @@ impl TryFrom<Sqlite3Todo> for Todo {
     }
 }
 
-impl<'r> FromRow<'r, SqliteRow> for Todo {
-    fn from_row(row: &'r SqliteRow) -> Result<Self, sqlx::Error> {
-        let id = row.try_get("id")?;
-        let title = row.try_get("title")?;
-        let completed = row.try_get("completed")?;
-        let user_id = row.try_get("user_id")?;
-        let created_at = DateTime::parse_from_rfc3339(row.try_get("created_at")?)
-            .map_err(|e| sqlx::Error::Decode(e.into()))?
-            .into();
-        let updated_at = row
-            .try_get::<Option<String>, _>("updated_at")?
-            .map(|s| DateTime::parse_from_rfc3339(&s))
-            .transpose()
-            .map_err(|e| sqlx::Error::Decode(e.into()))?
-            .map(Into::into);
-
-        Ok(Self {
-            id,
-            title,
-            completed,
-            user_id,
-            created_at,
-            updated_at,
-        })
-    }
-}
-
 pub struct Sqlite3Todo {
     pub id: i64,
     pub title: String,
@@ -63,6 +36,13 @@ pub struct Sqlite3Todo {
     pub user_id: i64,
     pub created_at: String,
     pub updated_at: Option<String>,
+}
+
+pub struct Sqlite3User {
+    pub id: i64,
+    pub email: String,
+    pub password_hash: SecretString,
+    pub created_at: String,
 }
 
 #[derive(serde::Deserialize)]
