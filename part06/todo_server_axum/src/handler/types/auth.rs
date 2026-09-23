@@ -2,7 +2,7 @@ use regex::Regex;
 use secrecy::{ExposeSecret, SecretString};
 use serde::Serializer;
 
-use crate::{handler::types::AppError, repository::types::Sqlite3User};
+use crate::{handler::types::error::AppError, repository::types::Sqlite3User};
 
 #[derive(serde::Serialize)]
 pub struct UserResponse {

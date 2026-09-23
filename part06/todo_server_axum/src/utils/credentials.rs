@@ -1,4 +1,5 @@
 use argon2::{Argon2, Params, PasswordHash, PasswordHasher, PasswordVerifier};
+use jsonwebtoken::{EncodingKey, Header, encode};
 use rand::distr::{Alphanumeric, SampleString};
 use secrecy::{ExposeSecret, SecretString};
 
@@ -27,4 +28,33 @@ pub fn verify_password(
     Argon2::default()
         .verify_password(password.expose_secret().as_bytes(), &password_hash)
         .map(|_| true)
+}
+
+#[derive(serde::Serialize)]
+pub struct JWT {
+    sub: i64,
+    email: String,
+    iat: i64,
+}
+
+impl JWT {
+    pub fn new(sub: i64, email: &str) -> JWT {
+        JWT {
+            sub,
+            email: email.to_string(),
+            iat: chrono::Utc::now().timestamp(),
+        }
+    }
+
+    pub fn token(
+        &self,
+        jwt_secret: &SecretString,
+    ) -> Result<SecretString, jsonwebtoken::errors::Error> {
+        encode(
+            &Header::default(),
+            self,
+            &EncodingKey::from_secret(jwt_secret.expose_secret().as_bytes()),
+        )
+        .map(SecretString::from)
+    }
 }

@@ -1,6 +1,3 @@
-use std::sync::Arc;
-
-use sqlx::SqlitePool;
 use tokio::net::TcpListener;
 
 use crate::{router::get_app_router, state::AppState};

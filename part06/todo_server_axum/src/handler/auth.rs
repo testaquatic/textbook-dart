@@ -1,21 +1,25 @@
-use axum::Json;
-use secrecy::SecretString;
+use axum::{
+    Json,
+    extract::State,
+    http,
+    response::{IntoResponse, Response},
+};
 
-use crate::handler::types::{
-    AppError,
-    auth::{AuthRequest, UserInfo, UserResponse},
+use crate::{
+    handler::types::{auth::AuthRequest, error::AppError},
+    service,
+    state::AppState,
 };
 
 #[tracing::instrument(name = "register", skip_all)]
-pub async fn register(auth_request: Json<AuthRequest>) -> Result<Json<UserResponse>, AppError> {
+pub async fn register(
+    State(state): State<AppState>,
+    auth_request: Json<AuthRequest>,
+) -> Result<Response, AppError> {
     auth_request.check_input()?;
 
-    Ok(Json(UserResponse {
-        token: SecretString::new("token".into()),
-        user: UserInfo {
-            id: 1,
-            email: "test@exmaple.com".to_string(),
-            created_at: "2026-09-23T14:30:00+09:00".to_string(),
-        },
-    }))
+    let user_response =
+        service::users::register(&state.config, &state.db_pool, &auth_request).await?;
+
+    Ok((http::StatusCode::CREATED, Json(user_response)).into_response())
 }

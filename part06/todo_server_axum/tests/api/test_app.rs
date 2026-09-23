@@ -19,7 +19,7 @@ impl TestApp {
         // 임시로 하드코딩 했다.
         let mut config = Configuration {
             port: 0,
-            db_path: "todo.db".to_string(),
+            db_path: ":memory:".to_string(),
             jwt_secret: SecretString::new("todo-secret-key".into()),
         };
 
@@ -29,6 +29,8 @@ impl TestApp {
         let pool = SqlitePool::connect(config.db_path.as_str())
             .await
             .expect("DB 연결 실패");
+
+        sqlx::migrate!("./migrations").run(&pool).await?;
 
         let state = AppState::new(config.clone(), pool);
 
