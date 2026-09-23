@@ -1,6 +1,9 @@
 use reqwest::Response;
 use secrecy::SecretString;
-use todo_server_axum::{config::Configuration, startup::run_app, telemetry::init_telemetry};
+use sqlx::SqlitePool;
+use todo_server_axum::{
+    config::Configuration, startup::run_app, state::AppState, telemetry::init_telemetry,
+};
 use tokio::{net::TcpListener, task::JoinHandle};
 
 pub struct TestApp {
@@ -19,12 +22,19 @@ impl TestApp {
             db_path: "todo.db".to_string(),
             jwt_secret: SecretString::new("todo-secret-key".into()),
         };
+
         let listener = TcpListener::bind("localhost:0").await?;
         config.port = listener.local_addr()?.port();
 
+        let pool = SqlitePool::connect(config.db_path.as_str())
+            .await
+            .expect("DB 연결 실패");
+
+        let state = AppState::new(config.clone(), pool);
+
         let reqwest_client = reqwest::Client::new();
 
-        let server_handle = tokio::spawn(async { run_app(listener).await });
+        let server_handle = tokio::spawn(async { run_app(listener, state).await });
 
         Ok(Self {
             _server_handle: server_handle,

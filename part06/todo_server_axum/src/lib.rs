@@ -5,5 +5,6 @@ pub mod repository;
 pub mod router;
 pub mod service;
 pub mod startup;
+pub mod state;
 pub mod telemetry;
 pub mod utils;

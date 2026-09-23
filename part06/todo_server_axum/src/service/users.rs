@@ -3,15 +3,17 @@
 //! 의존 방향을 레포지토리 -> 서비스 -> 핸들러의 방향 대신에
 //! 핸들러 -> 서비스 <- 레포지토리로 구성하는 것이 더 편한 것 같다.
 
+use sqlx::SqlitePool;
+
 use crate::{
     handler::types::auth::{AuthRequest, UserResponse},
-    repository::user_repostitory::Sqlite3UserRepository,
+    repository::user_repostitory::{create_user, find_user_by_email},
     service::error::ServiceError,
     utils::credentials::password_to_phc_string,
 };
 
 pub async fn register(
-    user_repo: &Sqlite3UserRepository,
+    pool: &SqlitePool,
     auth_request: &AuthRequest,
 ) -> Result<UserResponse, ServiceError> {
     let password = auth_request.password.clone();
@@ -23,7 +25,7 @@ pub async fn register(
         })?
         .map_err(|e| ServiceError::InternalServerError(e.into()))?;
 
-    let user = user_repo.find_by_email(&auth_request.email).await?;
+    let user = find_user_by_email(pool, &auth_request.email).await?;
 
     if user.is_some() {
         return Err(ServiceError::ValidationError(
@@ -31,9 +33,7 @@ pub async fn register(
         ));
     }
 
-    let created_user = user_repo
-        .create(&auth_request.email, &password_hash)
-        .await?;
+    let created_user = create_user(pool, &auth_request.email, &password_hash).await?;
 
     todo!()
 }

@@ -1,16 +1,34 @@
 use regex::Regex;
 use secrecy::{ExposeSecret, SecretString};
+use serde::Serializer;
 
 use crate::{handler::types::AppError, repository::types::Sqlite3User};
 
 #[derive(serde::Serialize)]
 pub struct UserResponse {
+    #[serde(serialize_with = "serialize_secret_string")]
+    pub token: SecretString,
+    pub user: UserInfo,
+}
+
+fn serialize_secret_string<S>(
+    secret_string: &SecretString,
+    serializer: S,
+) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    serializer.serialize_str(secret_string.expose_secret())
+}
+
+#[derive(serde::Serialize)]
+pub struct UserInfo {
     pub id: i64,
     pub email: String,
     pub created_at: String,
 }
 
-impl From<Sqlite3User> for UserResponse {
+impl From<Sqlite3User> for UserInfo {
     fn from(user: Sqlite3User) -> Self {
         Self {
             id: user.id,

@@ -1,5 +1,8 @@
 use secrecy::SecretString;
-use todo_server_axum::{config::Configuration, startup::run_app, telemetry::init_telemetry};
+use sqlx::SqlitePool;
+use todo_server_axum::{
+    config::Configuration, startup::run_app, state::AppState, telemetry::init_telemetry,
+};
 use tokio::net::TcpListener;
 
 #[tokio::main]
@@ -13,9 +16,15 @@ async fn main() {
         jwt_secret: SecretString::new("todo-secret-key".into()),
     };
 
-    let listener = TcpListener::bind(format!("localhost:{}", config.port))
+    let pool = SqlitePool::connect(config.db_path.as_str())
+        .await
+        .expect("DB 연결 실패");
+
+    let state = AppState::new(config, pool);
+
+    let listener = TcpListener::bind(format!("localhost:{}", state.config.port))
         .await
         .expect("주소 바인딩 실패");
 
-    run_app(listener).await;
+    run_app(listener, state).await;
 }
