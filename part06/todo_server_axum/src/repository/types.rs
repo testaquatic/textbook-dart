@@ -1,5 +1,6 @@
 use secrecy::SecretString;
 
+/// DB에서 반환하는 Todo 정보
 pub struct Sqlite3Todo {
     pub id: i64,
     pub title: String,
@@ -9,6 +10,7 @@ pub struct Sqlite3Todo {
     pub updated_at: Option<String>,
 }
 
+/// DB에서 반환하는 User 정보
 pub struct Sqlite3User {
     pub id: i64,
     pub email: String,

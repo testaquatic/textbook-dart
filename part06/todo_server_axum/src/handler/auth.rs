@@ -11,6 +11,7 @@ use crate::{
     state::AppState,
 };
 
+/// todo: 자세한 주석을 작성할 것
 #[tracing::instrument(name = "register", skip_all)]
 pub async fn register(
     State(state): State<AppState>,

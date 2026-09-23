@@ -3,6 +3,7 @@ use jsonwebtoken::{EncodingKey, Header, encode};
 use rand::distr::{Alphanumeric, SampleString};
 use secrecy::{ExposeSecret, SecretString};
 
+/// 비밀번호를 해싱하고 phc문자열로 변경한다.
 pub fn password_to_phc_string(
     password: &SecretString,
 ) -> Result<SecretString, argon2::password_hash::Error> {
@@ -20,6 +21,7 @@ pub fn password_to_phc_string(
     Ok(hash.to_string().into())
 }
 
+/// 비밀번호를 확인한다.
 pub fn verify_password(
     password: &SecretString,
     phc_string: &SecretString,
@@ -30,10 +32,13 @@ pub fn verify_password(
         .map(|_| true)
 }
 
+/// JWT
 #[derive(serde::Serialize)]
 pub struct JWT {
+    /// 사용자 id
     sub: i64,
     email: String,
+    /// 유닉스 타임스탬프(초)
     iat: i64,
 }
 

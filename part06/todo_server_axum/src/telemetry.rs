@@ -5,6 +5,7 @@ use tracing_subscriber::{
     util::SubscriberInitExt,
 };
 
+/// 로깅 초기화
 pub fn init_telemetry() {
     let env_filter = if cfg!(debug_assertions) {
         EnvFilter::try_from_default_env()

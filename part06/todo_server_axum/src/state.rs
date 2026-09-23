@@ -4,6 +4,7 @@ use sqlx::SqlitePool;
 
 use crate::config::Configuration;
 
+/// 상태
 #[derive(Clone)]
 pub struct AppState {
     pub config: Arc<Configuration>,

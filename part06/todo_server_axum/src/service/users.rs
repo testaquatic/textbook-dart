@@ -1,7 +1,7 @@
 //! 별도의 구조체를 작성하지 않는다.
 //! 복잡성만 늘리는 것 같다.
 //! 의존 방향을 레포지토리 -> 서비스 -> 핸들러의 방향 대신에
-//! 핸들러 -> 서비스 <- 레포지토리로 구성하는 것이 더 편한 것 같다.
+//! 레포지토리 -> (핸들러 + 서비스)  구성하는 것이 더 편한 것 같다.
 
 use sqlx::SqlitePool;
 
@@ -13,6 +13,7 @@ use crate::{
     utils::credentials::{JWT, password_to_phc_string},
 };
 
+/// 사용자를 DB에 등록하는 가교 역할을 하는 함수
 pub async fn register(
     config: &Configuration,
     pool: &SqlitePool,
