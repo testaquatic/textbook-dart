@@ -1,5 +1,4 @@
 use chrono::{DateTime, Utc};
-use secrecy::SecretString;
 
 use crate::repository::types::Sqlite3Todo;
 
@@ -40,11 +39,4 @@ pub struct CreateTodoRequest {
 pub struct UpdateTodoRequest {
     pub title: String,
     pub completed: bool,
-}
-
-pub struct User {
-    pub id: i64,
-    pub email: String,
-    password_hash: SecretString,
-    pub created_at: DateTime<Utc>,
 }

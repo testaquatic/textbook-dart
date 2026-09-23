@@ -1,9 +1,14 @@
 use axum::Json;
 
-use crate::handler::types::{AppError, UserResponse};
+use crate::handler::types::{
+    AppError,
+    auth::{AuthRequest, UserResponse},
+};
 
 #[tracing::instrument(name = "register", skip_all)]
-pub async fn register() -> Result<Json<UserResponse>, AppError> {
+pub async fn register(auth_request: Json<AuthRequest>) -> Result<Json<UserResponse>, AppError> {
+    auth_request.check_input()?;
+
     Ok(Json(UserResponse {
         id: 1,
         email: "test@exmaple.com".to_string(),

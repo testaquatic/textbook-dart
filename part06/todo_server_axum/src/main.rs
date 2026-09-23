@@ -1,16 +1,21 @@
-use todo_server_axum::{router::get_app_router, telemetry::init_telemetry};
+use secrecy::SecretString;
+use todo_server_axum::{config::Configuration, startup::run_app, telemetry::init_telemetry};
 use tokio::net::TcpListener;
 
 #[tokio::main]
 async fn main() {
     init_telemetry();
-    let app_router = get_app_router();
-    let listener = TcpListener::bind("localhost:8080")
+
+    // 임시로 하드코딩 했다.
+    let config = Configuration {
+        port: 8080,
+        db_path: "todo.db".to_string(),
+        jwt_secret: SecretString::new("todo-secret-key".into()),
+    };
+
+    let listener = TcpListener::bind(format!("localhost:{}", config.port))
         .await
-        .expect("TcpListener 바인드 실패");
-    
-    tracing::info!("Server starts listening on {:?}", listener.local_addr());
-    axum::serve(listener, app_router)
-        .await
-        .expect("서버 실행 실패")
+        .expect("주소 바인딩 실패");
+
+    run_app(listener).await;
 }
