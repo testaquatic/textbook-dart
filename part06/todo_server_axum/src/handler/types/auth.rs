@@ -49,10 +49,13 @@ impl From<Sqlite3User> for UserInfo {
 /// 인증 관련 요청
 #[derive(serde::Deserialize, utoipa::ToSchema)]
 pub struct AuthRequest {
+    #[serde(default)]
     pub email: String,
     #[schema(value_type = String)]
+    #[serde(default)]
     pub password: SecretString,
 }
+
 impl AuthRequest {
     pub fn check_input(&self) -> Result<(), AppError> {
         let regexp = Regex::new(r#"^[.\w-]+@([\w-]+\.)+[\w-]{2,}$"#)

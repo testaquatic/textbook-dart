@@ -56,4 +56,33 @@ impl TestApp {
     ) -> Result<Response, reqwest::Error> {
         self.reqwest_client.post(url).json(&json).send().await
     }
+
+    pub async fn register_user(
+        &self,
+        email: &str,
+        password: &str,
+    ) -> Result<Response, anyhow::Error> {
+        let response = self
+            .post(
+                &self.url("/auth/register"),
+                serde_json::json!({
+                    "email": email,
+                    "password": password,
+                }),
+            )
+            .await?;
+
+        Ok(response)
+    }
+
+    pub async fn login(&self, email: &str, password: &str) -> Result<Response, anyhow::Error> {
+        let response = self
+            .post(
+                &self.url("/auth/login"),
+                serde_json::json!({"email": email, "password": password}),
+            )
+            .await?;
+
+        Ok(response)
+    }
 }

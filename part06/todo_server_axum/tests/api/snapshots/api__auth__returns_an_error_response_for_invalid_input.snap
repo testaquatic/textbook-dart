@@ -1,7 +1,0 @@
----
-source: tests/api/auth.rs
-expression: json
----
-{
-  "error": "올바른 이메일 형식이 아닙니다."
-}

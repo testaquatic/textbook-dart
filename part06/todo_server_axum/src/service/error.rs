@@ -3,6 +3,9 @@ pub enum ServiceError {
     #[error("Validation error: {0}")]
     ValidationError(String),
 
+    #[error("UnauthorizedError: {0}")]
+    UnauthorizedError(String),
+
     #[error("Internal server error: {0}")]
     InternalServerError(anyhow::Error),
 

@@ -24,7 +24,7 @@ tower = "0.5.3"
 tower-http = { version = "0.7.1", features = ["compression-full", "cors", "decompression-full", "timeout", "trace"] }
 tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.23", features = ["env-filter", "json"] }
-utoipa = { version = "5", features = ["axum_extras"] }
+utoipa = { version = "5.5.0", features = ["axum_extras"] }
 utoipa-axum = "0.3.0"
 utoipa-swagger-ui = { version = "9.0.2", features = ["axum", "reqwest"] }
 uuid = { version = "1.26.1", features = ["v7"] }

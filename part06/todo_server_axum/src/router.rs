@@ -14,7 +14,7 @@ use utoipa::{
 use utoipa_swagger_ui::SwaggerUi;
 
 use crate::{
-    handler::auth::{AuthOpenApi, register},
+    handler::{self, auth::AuthOpenApi},
     middleware::request_id_middleware::request_id_middleware,
     state::AppState,
 };
@@ -34,7 +34,8 @@ pub fn get_app_router(app_state: AppState) -> Router {
         .max_age(Duration::from_hours(24));
 
     Router::new()
-        .route("/auth/register", routing::post(register))
+        .route("/auth/register", routing::post(handler::auth::register))
+        .route("/auth/login", routing::post(handler::auth::login))
         .with_state(app_state)
         .merge(get_open_api_router())
         .layer(CompressionLayer::new())
